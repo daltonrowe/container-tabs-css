@@ -52,12 +52,13 @@
           --d: calc(var(--depth) + 1);
           --offset: 1 / var(--d);
           --distance: var(--d) * var(--d) * 0.1px;
+          --lag: calc(0.15s * var(--depth));
 
           fill: transparent;
-          stroke: rgba(249, 249, 250, 1);
+          stroke: rgba(249, 249, 250, calc(var(--offset) * 2));
           stroke-width: 0.02px;
           transform: translateX(calc(var(--distance) * var(--x))) translateY(calc(var(--distance) * var(--y)));
-          opacity: calc(1 / var(--d));
+          transition: transform var(--lag) ease;
         }
       }
     }
