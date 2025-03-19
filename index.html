@@ -20,8 +20,6 @@
       transform: translateX(-50%) translateY(-50%);
       --x: 0;
       --y: 0;
-      overflow: hidden;
-      /* mask: url(mask.svg) */
     }
 
     .layer {
@@ -31,36 +29,36 @@
       transform: translateX(-50%) translateY(-50%);
       width: 100%;
       height: 100%;
-
-
     }
 
     svg {
       width: 100%;
       height: 100%;
 
-      g {
-        overflow: hidden;
+      &>rect,
+      &>path {
         fill: transparent;
-        stroke: rgba(249, 249, 250, 1);
+        stroke: white;
         stroke-width: 0.02px;
-
-        :first-child {
-          stroke-width: 0.1px;
-        }
       }
 
-      rect,
-      path {
-        --d: calc(var(--depth) + 1);
-        --offset: 1 / var(--d);
-        --distance: var(--d) * var(--d) * 0.1px;
-
+      g {
         fill: transparent;
         stroke: rgba(249, 249, 250, 1);
         stroke-width: 0.02px;
-        transform: translateX(calc(var(--distance) * var(--x))) translateY(calc(var(--distance) * var(--y)));
-        opacity: calc(1 / var(--d));
+
+        rect,
+        path {
+          --d: calc(var(--depth) + 1);
+          --offset: 1 / var(--d);
+          --distance: var(--d) * var(--d) * 0.1px;
+
+          fill: transparent;
+          stroke: rgba(249, 249, 250, 1);
+          stroke-width: 0.02px;
+          transform: translateX(calc(var(--distance) * var(--x))) translateY(calc(var(--distance) * var(--y)));
+          opacity: calc(1 / var(--d));
+        }
       }
     }
   </style>
@@ -88,42 +86,32 @@
           <rect x="9" y="9" width="6" height="6" rx="1" />
         </clipPath>
       </defs>
-
-      <g clip-path="url(#tl)">
-        <rect x=" 1" y="1" width="6" height="6" rx="1" />
-      </g>
-
-      <g clip-path="url(#tr)">
-        <path
-          d="M14.75 3H13V1.25A0.25 0.25 0 0 0 12.75 1h-1.5A0.25 0.25 0 0 0 11 1.25V3H9.25A0.25 0.25 0 0 0 9 3.25v1.5A0.25 0.25 0 0 0 9.25 5H11v1.75A0.25 0.25 0 0 0 11.25 7h1.5A0.25 0.25 0 0 0 13 6.75V5h1.75A0.25 0.25 0 0 0 15 4.75v-1.5A0.25 0.25 0 0 0 14.75 3z"
-          fill-rule="evenodd" />
-      </g>
-
-      <g clip-path="url(#br)">
-        <rect x="1" y="9" width="6" height="6" rx="1" />
-      </g>
-
-      <g clip-path="url(#bl)">
-        <rect x="9" y="9" width="6" height="6" rx="1" />
-      </g>
     </svg>
   </div>
 
   <script>
-    const root = document.querySelector('#root')
-    const svg = root.querySelector('svg');
-    const groups = svg.querySelectorAll('g');
+    const root = document.querySelector("#root");
+    const svg = root.querySelector("svg");
+    const clipPaths = svg.querySelectorAll("clipPath");
 
-    const depth = 8;
+    const depth = 12;
 
-    for (const g of groups) {
-      const path = g.children[0]
+    for (const c of clipPaths) {
+      const shape = c.children[0];
+      const id = c.id;
+
+      const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      g.setAttribute("clip-path", `url(#${id})`);
 
       for (let i = 1; i < depth; i++) {
-        const newPath = path.cloneNode()
-        newPath.style.setProperty('--depth', i)
-        g.appendChild(newPath);
+        const layer = shape.cloneNode();
+        layer.style.setProperty("--depth", i);
+        g.appendChild(layer);
       }
+
+      svg.appendChild(g);
+      const original = shape.cloneNode();
+      svg.appendChild(original);
     }
 
     function cycle(hz) {
@@ -135,10 +123,9 @@
       requestAnimationFrame(() => {
         const x = cycle(0.09) - 0.5;
         const y = cycle(0.1) - 0.5;
-        root.style.setProperty('--x', x)
-        root.style.setProperty('--y', y * -1)
-      })
-
+        root.style.setProperty("--x", x);
+        root.style.setProperty("--y", y * -1);
+      });
     }, 6);
   </script>
 
